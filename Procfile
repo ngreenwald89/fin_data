@@ -1,2 +1,2 @@
-web: python3 fin_data.py
+worker: python3 fin_data.py
 
