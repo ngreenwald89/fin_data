@@ -1,2 +1,2 @@
-web: python3.5 fin_data.py
+web: python3 fin_data.py
 
