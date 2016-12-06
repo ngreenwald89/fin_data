@@ -14,14 +14,6 @@ def hello():
 def parameters():
    return render_template('parameters.html')
 
-"""
-@app.route('/result', methods = ['POST', 'GET'])
-def result():
-   if request.method == 'POST':
-      result = request.form
-      return render_template("result.html", result = result)
-"""
-
 @app.route('/result', methods = ['POST', 'GET'])
 def result():
 	if request.method == 'POST':
