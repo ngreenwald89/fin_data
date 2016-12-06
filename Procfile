@@ -1,2 +1,2 @@
-web: python3 fin_data.py 33507
+web: gunicorn proj:fin_data
 
