@@ -1,2 +1,2 @@
-web: gunicorn proj:fin_data
+web: gunicorn app:fin_data
 
