@@ -1,4 +1,4 @@
-#!/Users/natgreenwald/Desktop/proj/env/bin/python
+#!/Users/nathanielgreenwald/Desktop/repos/fin_data/env/bin/python
 
 import sys
 import getopt
