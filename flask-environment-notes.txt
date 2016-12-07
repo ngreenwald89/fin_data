@@ -1,0 +1,9 @@
+flask-environment notes
+if you want to run with python3, must specify when making the virtualenv
+$ virtualenv -p python3 flask #or whatever you specify environment name as
+$ source flask/bin/activate
+$ pip install -r requirements.txt
+$ python3 fin_data.py #run program
+# appears that a python3 virtualenv is backwards compatible with python2, as 
+$ python fin_data.py 
+# also works
