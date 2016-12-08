@@ -45,11 +45,20 @@ def calc_index(df, weights):
 def make_df(parameters):
 	# prepare parameters
 	start, end = make_date_objects(parameters['start_date'], parameters['end_date'])
-	weights = [float(parameters['thirty_day_weight']), float(parameters['sixty_day_weight']), float(parameters['ninety_day_weight']), float(parameters['one_eighty_day_weight'])]
+	# weights = [float(parameters['thirty_day_weight']), float(parameters['sixty_day_weight']), float(parameters['ninety_day_weight']), float(parameters['one_eighty_day_weight'])]
+	weights = [float_option(parameters['thirty_day_weight']), float_option(parameters['sixty_day_weight']), float_option(parameters['ninety_day_weight']), float_option(parameters['one_eighty_day_weight'])]
 	symbols = parameters['symbols']
 	# make the API calls and build the dataframe
 	final_df = do_symbols(symbols=symbols, start=start, end=end, weights=weights)
 	return final_df
+
+def float_option(wt):
+	print("!!!!!!in float!!!")
+	try:
+		x = float(wt)
+	except ValueError:
+		x = .25
+	return x
 
 def write_to_csv(df, parameters):
 	df.loc[parameters['start_date']:parameters['end_date']].to_csv(parameters['filename'])
