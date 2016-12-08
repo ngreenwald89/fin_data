@@ -1,5 +1,6 @@
+#!/usr/bin/env python
 import os
-from flask import Flask, render_template, request, Response
+from flask import Flask, render_template, request, Response, send_file
 from get_data import some_data
 
 app = Flask(__name__)
@@ -14,7 +15,7 @@ def hello():
 def parameters():
    return render_template('parameters.html')
 
-@app.route('/result', methods = ['POST', 'GET'])
+@app.route('/result', methods = ['POST'])
 def result():
 	if request.method == 'POST':
 		parameters = request.form
@@ -23,15 +24,14 @@ def result():
 		new_dict['symbols'] = new_dict['symbols'].split(",")
 		print("new_dict", new_dict)
 		csv = some_data(new_dict)
-		# return render_template("result.html", result = dic)
+		
 		return Response(
 	        csv,
 	        mimetype="text/csv",
 	        headers={"Content-disposition":
-	                 "attachment; filename={0}.csv".format(new_dict['filename'])})		
+	                 "attachment; filename={0}.csv".format(new_dict['filename'])})
 
 if __name__ == "__main__":
-    # port = int(os.environ.get("PORT", 5000))
     port = int(os.environ.get("PORT", 33507))
     # app.run(host='0.0.0.0', port=port)
     app.run(debug=False, port=port)
