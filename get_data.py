@@ -39,14 +39,22 @@ def add_columns(df):
 	return df
 
 def calc_index(df, weights):
-	df['Index Calc'] = df['30-Day Return']*weights[0] + df['60-Day Return']*weights[1] + df['90-Day Return']*weights[2] + df['180-Day Return']*weights[3]
+	df['Index Calc'] = df['30-Day Return']*weights[0] + df['60-Day Return']*weights[1] + df['90-Day Return']*weights[2] + df['180-Day Return']*weights[3] + df['360-Day Return']*weights[4]
 	return df
 
 def make_df(parameters):
 	# prepare parameters
 	start, end = make_date_objects(parameters['start_date'], parameters['end_date'])
 	# weights = [float(parameters['thirty_day_weight']), float(parameters['sixty_day_weight']), float(parameters['ninety_day_weight']), float(parameters['one_eighty_day_weight'])]
-	weights = [float_option(parameters['thirty_day_weight']), float_option(parameters['sixty_day_weight']), float_option(parameters['ninety_day_weight']), float_option(parameters['one_eighty_day_weight'])]
+	weights = managing_weights(parameters)
+	"""
+	weights = [
+		float_option(parameters['thirty_day_weight']), 
+		float_option(parameters['sixty_day_weight']), 
+		float_option(parameters['ninety_day_weight']), 
+		float_option(parameters['one_eighty_day_weight'])
+	]
+	"""
 	symbols = parameters['symbols']
 	# make the API calls and build the dataframe
 	final_df = do_symbols(symbols=symbols, start=start, end=end, weights=weights)
@@ -57,11 +65,39 @@ def float_option(wt):
 	try:
 		x = float(wt)
 	except ValueError:
-		x = .25
+		x = 0
 	return x
 
+def managing_weights(parameters):
+	remainder = 1
+	weights = []
+	for wt in [parameters['thirty_day_weight'], parameters['sixty_day_weight'], parameters['ninety_day_weight'], parameters['one_eighty_day_weight']]:
+		print(wt)
+		wt = float_option(wt)
+		if wt >= 1:
+			wt = 0
+		elif remainder - wt >= 0:
+			weights.append(wt)
+			remainder -= wt
+		# if wt > remainder, give wt zero
+		else:
+			weights.append(0)
+	# 360 day value gets remainder
+	if remainder >= 0:
+		weights.append(remainder)
+	return weights
+
+
 def write_to_csv(df, parameters):
-	df.loc[parameters['start_date']:parameters['end_date']].to_csv(parameters['filename'])
+	writer = pd.ExcelWriter(parameters['filename']+".xlsx")
+	tickers = df['Symbol'].unique()
+	ticker_dfs = []
+	for ticker in tickers:
+		ticker_df = df[df['Symbol']==ticker]
+		slimmed_down = ticker_df.loc[parameters['start_date']:parameters['end_date']]
+		slimmed_down.to_excel(writer, ticker)
+	writer.save()
+	return writer
 
 def run_get_data(parameters):
 	df = make_df(parameters=parameters)
@@ -77,16 +113,3 @@ def some_data(parameters):
 	csv = df.to_csv()
 	return csv
 
-# NOT USING FUNCTIONS BELOW AT THE MOMENT
-def add_dates(df):
-	df['30-day date'] = df.index.shift(-22, freq='B')
-	df['60-day date'] = df.index.shift(-44, freq='B')
-	df['90-day date'] = df.index.shift(-66, freq='B')
-	df['180-day date'] = df.index.shift(-132, freq='B')
-	df['360-day date'] = df.index.shift(-264, freq='B')
-	return df
-
-def wrapper(func, *args, **kwargs):
-	def wrapped():
-		return func(*args, **kwargs)
-	return wrapped
