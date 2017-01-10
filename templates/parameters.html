@@ -1,6 +1,6 @@
 <html>
    <body>
-   <h1>Explainer: Get closing price data along with time period returns. 
+   <h4>Explainer: Get closing price data along with time period returns. 
    The N day return for day X is: 
       (X*100)/(X-N) - 100
    The weights are used to weight the set of N day returns in the "Index Calc" column.
@@ -8,7 +8,7 @@
    then 
       Index calc = .2*30_day_return + .4*60_day_return + .1*90_day_return .3*180_day_return
    If sum of weights is less than one, leftover ratio goes to 360_day_return
-   </h1>
+   </h4>
    <h3>Parameters</h3>
       <form action = "/result" method = "POST">
          <p>filename <input type = "text" name = "filename" /></p>
