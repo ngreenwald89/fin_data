@@ -1,3 +1,4 @@
+# for DataReader development
 import datetime
 import timeit
 import pandas as pd
@@ -26,9 +27,28 @@ def do_symbols(symbols, start, end, weights):
 	group_df = pd.concat(frames)
 	# below operations don't need to be done separately on each symbol
 	group_df = calc_index(group_df, weights)
+	data_start = group_df.index.searchsorted(start)
+	data_end = group_df.index.searchsorted(end)
+	group_df = group_df.ix[data_start : data_end]
 	group_df = group_df.round(2)
 	group_df.drop(['Open', 'High', 'Low', 'Volume', 'Adj Close'],axis=1,inplace=True)
 	return group_df
+
+def separate_frames(symbols, start, end, weights):
+	real_start = start - datetime.timedelta(days=400)
+	frames = []
+	for symbol in symbols:
+		df = web.DataReader(symbol, 'yahoo', real_start, end)
+		df = add_columns(df)
+		df['Symbol'] = symbol
+		df = calc_index(df, weights)
+		data_start = df.index.searchsorted(start)
+		data_end = df.index.searchsorted(end)
+		df = df.ix[data_start : data_end]
+		df = df.round(2)
+		df.drop(['Open', 'High', 'Low', 'Volume', 'Adj Close'],axis=1,inplace=True)
+		frames.append(df)
+	return frames
 
 def add_columns(df):
 	df['30-Day Return'] = df['Close']*100 / df['Close'].shift(22) - 100
@@ -42,10 +62,7 @@ def calc_index(df, weights):
 	three_sixty = 1 - sum(weights)
 	if three_sixty < 0:
 		three_sixty = 0
-	df['Index Calc'] = 
-		df['30-Day Return']*weights[0] + df['60-Day Return']*weights[1] 
-		+ df['90-Day Return']*weights[2] + df['180-Day Return']*weights[3]
-		+ df['360-Day Return']*three_sixty
+	df['Index Calc'] = df['30-Day Return']*weights[0] + df['60-Day Return']*weights[1] + df['90-Day Return']*weights[2] + df['180-Day Return']*weights[3] + df['360-Day Return']*three_sixty
 	return df
 
 def make_df(parameters):
@@ -58,14 +75,16 @@ def make_df(parameters):
 			]
 	symbols = parameters['symbols']
 	# make the API calls and build the dataframe
-	final_df = do_symbols(symbols=symbols, start=start, end=end, weights=weights)
+	# final_df = do_symbols(symbols=symbols, start=start, end=end, weights=weights)
+	final_df = separate_frames(symbols=symbols, start=start, end=end, weights=weights)
 	return final_df
 
 def float_option(wt):
 	print("!!!!!!in float!!!")
 	try:
 		x = float(wt)
-	except ValueError:
+	except Error as e:
+		print(e)
 		x = 0
 	return x
 
@@ -86,16 +105,17 @@ def some_data(parameters):
 	csv = df.to_csv()
 	return csv
 
-# NOT USING FUNCTIONS BELOW AT THE MOMENT
-def add_dates(df):
-	df['30-day date'] = df.index.shift(-22, freq='B')
-	df['60-day date'] = df.index.shift(-44, freq='B')
-	df['90-day date'] = df.index.shift(-66, freq='B')
-	df['180-day date'] = df.index.shift(-132, freq='B')
-	df['360-day date'] = df.index.shift(-264, freq='B')
-	return df
+def excel_test(parameters):
+	dfs = make_df(parameters=parameters)
+	writer = pd.ExcelWriter(
+		parameters['filename'] + '.xlsx', engine='xlsxwriter'
+		)
+	for df in dfs:
 
-def wrapper(func, *args, **kwargs):
-	def wrapped():
-		return func(*args, **kwargs)
-	return wrapped
+		# print(df['Symbol'])
+		df_symbol = df['Symbol'].values[0]
+		df.to_excel(writer,df_symbol)
+	return dfs
+
+def test():
+	return excel_test(parameters)
