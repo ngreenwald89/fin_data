@@ -1,5 +1,6 @@
 import datetime
 import timeit
+import io
 import pandas as pd
 import pandas_datareader.data as web
 from parameters import parameters
@@ -30,6 +31,22 @@ def do_symbols(symbols, start, end, weights):
 	group_df.drop(['Open', 'High', 'Low', 'Volume', 'Adj Close'],axis=1,inplace=True)
 	return group_df
 
+def separate_frames(symbols, start, end, weights):
+	real_start = start - datetime.timedelta(days=400)
+	frames = []
+	for symbol in symbols:
+		df = web.DataReader(symbol, 'yahoo', real_start, end)
+		df = add_columns(df)
+		df['Symbol'] = symbol
+		df = calc_index(df, weights)
+		data_start = df.index.searchsorted(start)
+		data_end = df.index.searchsorted(end)
+		df = df.ix[data_start : data_end]
+		df = df.round(2)
+		df.drop(['Open', 'High', 'Low', 'Volume', 'Adj Close'],axis=1,inplace=True)
+		frames.append(df)
+	return frames
+
 def add_columns(df):
 	df['30-Day Return'] = df['Close']*100 / df['Close'].shift(22) - 100
 	df['60-Day Return'] = df['Close']*100 / df['Close'].shift(44) - 100
@@ -42,10 +59,7 @@ def calc_index(df, weights):
 	three_sixty = 1 - sum(weights)
 	if three_sixty < 0:
 		three_sixty = 0
-	df['Index Calc'] = 
-		df['30-Day Return']*weights[0] + df['60-Day Return']*weights[1] 
-		+ df['90-Day Return']*weights[2] + df['180-Day Return']*weights[3]
-		+ df['360-Day Return']*three_sixty
+	df['Index Calc'] = df['30-Day Return']*weights[0] + df['60-Day Return']*weights[1] + df['90-Day Return']*weights[2] + df['180-Day Return']*weights[3] + df['360-Day Return']*three_sixty
 	return df
 
 def make_df(parameters):
@@ -58,14 +72,15 @@ def make_df(parameters):
 			]
 	symbols = parameters['symbols']
 	# make the API calls and build the dataframe
-	final_df = do_symbols(symbols=symbols, start=start, end=end, weights=weights)
-	return final_df
+	frames = separate_frames(symbols=symbols, start=start, end=end, weights=weights)
+	return frames
 
 def float_option(wt):
 	print("!!!!!!in float!!!")
 	try:
 		x = float(wt)
-	except ValueError:
+	except Error as e:
+		print(e)
 		x = 0
 	return x
 
@@ -85,6 +100,18 @@ def some_data(parameters):
 	# write_to_csv(df, parameters)
 	csv = df.to_csv()
 	return csv
+
+def excel_test(parameters):
+	dfs = make_df(parameters=parameters)
+	output = io.BytesIO()
+	writer = pd.ExcelWriter(output, engine='xlsxwriter')
+	for df in dfs:
+		df_symbol = df['Symbol'].values[0]
+		df.to_excel(writer,df_symbol)
+	writer.close()
+	output.seek(0)
+	r = output.read()
+	return r
 
 # NOT USING FUNCTIONS BELOW AT THE MOMENT
 def add_dates(df):

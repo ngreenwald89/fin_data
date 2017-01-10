@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 import os
-from flask import Flask, render_template, request, Response, send_file
-from get_data import some_data
+import io
+import xlsxwriter
+from flask import Flask, render_template, request, Response, send_file, make_response
+from get_data import some_data, excel_test
 
 app = Flask(__name__)
 
@@ -23,13 +25,17 @@ def result():
 		new_dict = parameters.to_dict()
 		new_dict['symbols'] = new_dict['symbols'].split(",")
 		print("new_dict", new_dict)
-		csv = some_data(new_dict)
-		
+		# csv = some_data(new_dict)
+		xlsx = excel_test(new_dict)
+		"""response = make_response(xlsx)
+		response.headers["Content-disposition"] = "attachment; filename={0}.xlsx".format(new_dict['filename'])
+		return response"""
 		return Response(
-	        csv,
-	        mimetype="text/csv",
+	        xlsx,
+	        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 	        headers={"Content-disposition":
-	                 "attachment; filename={0}.csv".format(new_dict['filename'])})
+	                 "attachment; filename={0}.xlsx".format(new_dict['filename'])}
+        )
 
 if __name__ == "__main__":
     # port = int(os.environ.get("PORT", 33507))

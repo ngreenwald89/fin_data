@@ -76,8 +76,8 @@ def make_df(parameters):
 	symbols = parameters['symbols']
 	# make the API calls and build the dataframe
 	# final_df = do_symbols(symbols=symbols, start=start, end=end, weights=weights)
-	final_df = separate_frames(symbols=symbols, start=start, end=end, weights=weights)
-	return final_df
+	frames = separate_frames(symbols=symbols, start=start, end=end, weights=weights)
+	return frames
 
 def float_option(wt):
 	print("!!!!!!in float!!!")
@@ -115,7 +115,7 @@ def excel_test(parameters):
 		# print(df['Symbol'])
 		df_symbol = df['Symbol'].values[0]
 		df.to_excel(writer,df_symbol)
-	return dfs
+	return writer
 
 def test():
 	return excel_test(parameters)
