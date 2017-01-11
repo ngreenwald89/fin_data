@@ -3,7 +3,7 @@ import os
 import io
 # import xlsxwriter
 from flask import Flask, render_template, request, Response, send_file, make_response
-from get_data import some_data, excel_test
+from get_data import excel_test
 
 app = Flask(__name__)
 
