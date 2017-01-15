@@ -31,8 +31,6 @@ def some_data(parameters):
 	csv = df.to_csv()
 	return csv
 
-
-
 # NOT USING FUNCTIONS BELOW AT THE MOMENT
 def add_dates(df):
 	df['30-day date'] = df.index.shift(-22, freq='B')
