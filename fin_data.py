@@ -3,7 +3,7 @@ import os
 import io
 # import xlsxwriter
 from flask import Flask, render_template, request, Response, send_file, make_response
-from get_data import excel_test
+from get_data import main_get_data
 
 app = Flask(__name__)
 
@@ -26,7 +26,7 @@ def result():
 		new_dict['symbols'] = new_dict['symbols'].split(",")
 		print("new_dict", new_dict)
 		# csv = some_data(new_dict)
-		xlsx = excel_test(new_dict)
+		xlsx = main_get_data(new_dict)
 		"""response = make_response(xlsx)
 		response.headers["Content-disposition"] = "attachment; filename={0}.xlsx".format(new_dict['filename'])
 		return response"""
