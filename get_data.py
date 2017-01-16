@@ -20,7 +20,6 @@ def excel_test(parameters):
 def make_df(parameters):
 	# prepare parameters
 	start, end = make_date_objects(parameters['start_date'], parameters['end_date'])
-	# weights = [float(parameters['thirty_day_weight']), float(parameters['sixty_day_weight']), float(parameters['ninety_day_weight']), float(parameters['one_eighty_day_weight'])]
 	weights = [
 		float_option(parameters['thirty_day_weight']), float_option(parameters['sixty_day_weight']), 
 		float_option(parameters['ninety_day_weight']), float_option(parameters['one_eighty_day_weight'])
@@ -68,22 +67,16 @@ def calc_index(df, weights):
 	three_sixty = 1 - sum(weights)
 	if three_sixty < 0:
 		three_sixty = 0
-	df['Index Calc'] = df['30-Day Return']*weights[0] + df['60-Day Return']*weights[1] + df['90-Day Return']*weights[2] + df['180-Day Return']*weights[3] + df['360-Day Return']*three_sixty
+	df['Index Calc'] = (
+		df['30-Day Return']*weights[0] + df['60-Day Return']*weights[1] 
+		+ df['90-Day Return']*weights[2] + df['180-Day Return']*weights[3] 
+		+ df['360-Day Return']*three_sixty)
 	return df
 
 def make_df(parameters):
 	# prepare parameters
 	start, end = make_date_objects(parameters['start_date'], parameters['end_date'])
-	# weights = [float(parameters['thirty_day_weight']), float(parameters['sixty_day_weight']), float(parameters['ninety_day_weight']), float(parameters['one_eighty_day_weight'])]
 	weights = managing_weights(parameters)
-	"""
-	weights = [
-		float_option(parameters['thirty_day_weight']), 
-		float_option(parameters['sixty_day_weight']), 
-		float_option(parameters['ninety_day_weight']), 
-		float_option(parameters['one_eighty_day_weight'])
-	]
-	"""
 	symbols = parameters['symbols']
 	# make the API calls and build the dataframe
 	final_df = do_symbols(symbols=symbols, start=start, end=end, weights=weights)
@@ -92,7 +85,6 @@ def make_df(parameters):
 def float_option(wt):
 	try:
 		x = float(wt)
-
 	except Error as e:
 		print(e)
 		x = 0
@@ -101,7 +93,9 @@ def float_option(wt):
 def managing_weights(parameters):
 	remainder = 1
 	weights = []
-	for wt in [parameters['thirty_day_weight'], parameters['sixty_day_weight'], parameters['ninety_day_weight'], parameters['one_eighty_day_weight']]:
+	for wt in [
+		parameters['thirty_day_weight'], parameters['sixty_day_weight'], 
+		parameters['ninety_day_weight'], parameters['one_eighty_day_weight']]:
 		print(wt)
 		wt = float_option(wt)
 		if wt >= 1:
