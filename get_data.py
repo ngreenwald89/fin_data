@@ -5,8 +5,8 @@ import pandas as pd
 import pandas_datareader.data as web
 from parameters import parameters
 
-def excel_test(parameters):
-	dfs = make_df(parameters=parameters)
+def main_get_data(parameters):
+	dfs = make_frames_wrapper(parameters=parameters)
 	output = io.BytesIO()
 	writer = pd.ExcelWriter(output, engine='xlsxwriter')
 	for df in dfs:
@@ -17,17 +17,16 @@ def excel_test(parameters):
 	r = output.read()
 	return r
 
-def make_df(parameters):
+def make_frames_wrapper(parameters):
 	# prepare parameters
 	start, end = make_date_objects(parameters['start_date'], parameters['end_date'])
-	# weights = [float(parameters['thirty_day_weight']), float(parameters['sixty_day_weight']), float(parameters['ninety_day_weight']), float(parameters['one_eighty_day_weight'])]
 	weights = [
 		float_option(parameters['thirty_day_weight']), float_option(parameters['sixty_day_weight']), 
 		float_option(parameters['ninety_day_weight']), float_option(parameters['one_eighty_day_weight'])
 			]
 	symbols = parameters['symbols']
 	# make the API calls and build the dataframe
-	frames = separate_frames(symbols=symbols, start=start, end=end, weights=weights)
+	frames = make_frames(symbols=symbols, start=start, end=end, weights=weights)
 	return frames
 
 def make_date_objects(*dates):
@@ -40,7 +39,7 @@ def make_date_objects(*dates):
 		date_objects.append(obj)
 	return date_objects
 
-def separate_frames(symbols, start, end, weights):
+def make_frames(symbols, start, end, weights):
 	real_start = start - datetime.timedelta(days=400)
 	frames = []
 	for symbol in symbols:
@@ -68,16 +67,19 @@ def calc_index(df, weights):
 	three_sixty = 1 - sum(weights)
 	if three_sixty < 0:
 		three_sixty = 0
-	df['Index Calc'] = df['30-Day Return']*weights[0] + df['60-Day Return']*weights[1] + df['90-Day Return']*weights[2] + df['180-Day Return']*weights[3] + df['360-Day Return']*three_sixty
+	df['Index Calc'] = (
+		df['30-Day Return']*weights[0] + df['60-Day Return']*weights[1] 
+		+ df['90-Day Return']*weights[2] + df['180-Day Return']*weights[3] 
+		+ df['360-Day Return']*three_sixty)
 	return df
-
 
 def float_option(wt):
 	try:
 		x = float(wt)
-	except Error as e:
+	except Exception as e:
 		print(e)
 		x = 0
 	return x
+
 
 
