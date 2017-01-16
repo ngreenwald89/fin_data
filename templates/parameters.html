@@ -1,14 +1,10 @@
 <html>
    <body>
-   <h4>Explainer: Get closing price data along with time period returns. 
-   The N day return for day X is: 
-      (X*100)/(X-N) - 100
-   The weights are used to weight the set of N day returns in the "Index Calc" column.
-   So if you put .2 for 30 days, .4 for 60 days, .1 for 90 days, and .3 for 180 days,
-   then 
-      Index calc = .2*30_day_return + .4*60_day_return + .1*90_day_return .3*180_day_return
-   If sum of weights is less than one, leftover ratio goes to 360_day_return
-   </h4>
+   <p>Download stock data, get approximate 30, 60, 90, 180, and 360 day returns, plus a field to weight those returns.
+   </p>
+   <p>N day return for day X: (X*100)/N-100.</p>
+   <p>So if stock price was 50 on 12/31/16, and 44 on 12/01/16, then 30 day return = (50*100)/44-100 = 13.63%.</p>
+   <p>Weighted_return = wt30*30day + wt60*60day + wt90*90day + wt180*180day + wt360*360day, where wt360 is the remainder of 1-sum(other weights). Each weight should be 0 <= wt <= 1</p>
    <h3>Parameters</h3>
       <form action = "/result" method = "POST">
          <p>filename <input type = "text" name = "filename" /></p>

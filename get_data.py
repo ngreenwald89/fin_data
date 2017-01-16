@@ -46,7 +46,7 @@ def make_frames(symbols, start, end, weights):
 		df = web.DataReader(symbol, 'yahoo', real_start, end)
 		df = add_columns(df)
 		df['Symbol'] = symbol
-		df = calc_index(df, weights)
+		df = weighted_return(df, weights)
 		data_start = df.index.searchsorted(start)
 		data_end = df.index.searchsorted(end)
 		df = df.ix[data_start : data_end]
@@ -63,11 +63,11 @@ def add_columns(df):
 	df['360-Day Return'] = df['Close']*100 / df['Close'].shift(264) - 100
 	return df
 
-def calc_index(df, weights):
+def weighted_return(df, weights):
 	three_sixty = 1 - sum(weights)
 	if three_sixty < 0:
 		three_sixty = 0
-	df['Index Calc'] = (
+	df['Weighted Return'] = (
 		df['30-Day Return']*weights[0] + df['60-Day Return']*weights[1] 
 		+ df['90-Day Return']*weights[2] + df['180-Day Return']*weights[3] 
 		+ df['360-Day Return']*three_sixty)
