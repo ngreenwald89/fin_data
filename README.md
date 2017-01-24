@@ -17,9 +17,9 @@ $ cd /path/to/fin_data
 
 2. When cloning for the first time, make virtual environment. if you don't have virtualenv, install with pip: pip install virtualenv. skip to activating environment in the future.
 
-$ virtualenv <env directory name>
+$ virtualenv `<env directory name>`
 
-$ source <env directory name>/bin/activate #activate environment.
+$ source `<env directory name>`/bin/activate #activate environment.
 
 $ pip install -r requirements.txt #installs the requirements
 
