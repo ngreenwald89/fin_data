@@ -1,6 +1,5 @@
-https://stockreturns123.herokuapp.com
-
 # fin_data
+https://stockreturns123.herokuapp.com
 Download stock data, get approximate 30, 60, 90, 180, and 360 day returns, plus a field to weight those returns.
 N day return for day X: (X*100)/N-100.
 
