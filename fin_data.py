@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import io
+import json
 # import xlsxwriter
 from flask import Flask, render_template, request, Response, send_file, make_response
 from get_data import main_get_data
@@ -20,9 +21,11 @@ def parameters():
 @app.route('/result', methods = ['GET','POST'])
 def result():
 	if request.method == 'POST':
-		parameters = request.form
-		print("symbols type from form", type(parameters['symbols']))
-		new_dict = parameters.to_dict()
+		print(request.data)
+		#parameters = request.form
+		new_dict = json.loads(request.data)
+		#print("symbols type from form", type(parameters['symbols']))
+		#new_dict = parameters.to_dict()
 		new_dict['symbols'] = new_dict['symbols'].split(",")
 		print("new_dict", new_dict)
 		# csv = some_data(new_dict)
