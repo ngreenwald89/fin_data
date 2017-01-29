@@ -21,9 +21,11 @@ def parameters():
 @app.route('/result', methods = ['GET','POST'])
 def result():
 	if request.method == 'POST':
-		print(request.data)
-		#parameters = request.form
-		new_dict = json.loads(request.data)
+		response=request.data
+		print('response', response)
+		str_response = response.decode('utf-8')
+		print('decode', str_response)
+		new_dict = json.loads(str_response)
 		#print("symbols type from form", type(parameters['symbols']))
 		#new_dict = parameters.to_dict()
 		new_dict['symbols'] = new_dict['symbols'].split(",")
