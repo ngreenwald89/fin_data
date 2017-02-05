@@ -10,7 +10,6 @@ def main_get_data(parameters):
 	output = io.BytesIO()
 	writer = pd.ExcelWriter(output, engine='xlsxwriter')
 	for df in dfs:
-		print(df.head)
 		df_symbol = df['Symbol'].values[0]
 		df.to_excel(writer,df_symbol)
 	writer.close()
@@ -19,7 +18,6 @@ def main_get_data(parameters):
 	return r
 
 def make_frames_wrapper(parameters):
-	print(parameters)
 	# prepare parameters
 	start, end = make_date_objects(parameters['start_date'], parameters['end_date'])
 	weights = [
@@ -34,11 +32,8 @@ def make_frames_wrapper(parameters):
 def make_date_objects(*dates):
 	date_objects = []
 	for date in dates:
-		print('date before split', date)
 		date = [int(string) for string in date.split('/')]
-		print('date after split', date)
 		obj=datetime.date(date[2], date[0], date[1])
-		print(date[2], date[0], date[1])
 		date_objects.append(obj)
 	return date_objects
 
@@ -46,14 +41,10 @@ def make_frames(symbols, start, end, weights):
 	real_start = start - datetime.timedelta(days=400)
 	frames = []
 	for symbol in symbols:
-		print(symbol)
 		df = web.DataReader(symbol, 'yahoo', real_start, end)
-		print(df.head)
 		df = add_columns(df)
 		df['Symbol'] = symbol
-		print('before', df, weights)
 		df = weighted_return(df, weights)
-		print('after', df, weights)
 		data_start = df.index.searchsorted(start)
 		data_end = df.index.searchsorted(end)
 		df = df.ix[data_start : data_end]
