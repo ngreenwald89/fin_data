@@ -1,22 +1,246 @@
-<html>
-   <body>
-   <p>Download stock data, get approximate 30, 60, 90, 180, and 360 day returns, plus a field to weight those returns.
-   </p>
-   <p>N day return for day X: (X*100)/N-100.</p>
-   <p>So if stock price was 50 on 12/31/16, and 44 on 12/01/16, then 30 day return = (50*100)/44-100 = 13.63%.</p>
-   <p>Weighted_return = wt30*30day + wt60*60day + wt90*90day + wt180*180day + wt360*360day, where wt360 is the remainder of 1-sum(other weights). Each weight should be 0 <= wt <= 1</p>
+<html ng-app="mainApp">
+	<head>
+		<!-- jQuery -->
+		<script src="../static/jquery/dist/jquery.min.js"></script>
+		<!-- Bootstrap -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+		<script src="https:maxcdn.bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<script src="../static/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+		<!-- Angular -->
+	    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+		<!-- Angular UI -->
+		<script src="../static/angular-ui-mask/dist/mask.min.js"></script>
+		<!-- File Saver -->
+		<script src="../static/file-saver/FileSaver.js" type="text/javascript" charset="utf-8"></script>
+	</head>
+   <body class="container text-center" ng-controller="paramController as vm">
+   
+   
+   
+   <div class="container">
+	   
+   <div class="jumbotron">
+	   <h1>Stocks 123</h1>
+	   <p>A tool for analyzing stock returns</p>
+   </div>
+   
+   <span>Not sure how to use this tool?</span><br>
+   <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#instructions">Instructions</button>
+   <div id="instructions" class="collapse">
+	   <br>
+	   <p>Download stock data, get approximate 30, 60, 90, 180, and 360 day returns, plus a field to weight those returns.
+	   </p>
+	   <p>N day return for day X: (X*100)/N-100.</p>
+	   <p>So if stock price was 50 on 12/31/16, and 44 on 12/01/16, then 30 day return = (50*100)/44-100 = 13.63%.</p>
+	   <p>Weighted_return = wt30*30day + wt60*60day + wt90*90day + wt180*180day + wt360*360day, where wt360 is the remainder of 1-sum(other weights). Each weight should be 0 <= wt <= 1</p>
+   </div>
+   
    <h3>Parameters</h3>
-      <form action = "/result" method = "POST">
-         <p>filename <input type = "text" name = "filename" /></p>
-         <p>symbols -- enter as comma separated symbols without spaces. Ex: VTI,VO,VB,IWC <input type = "text" name = "symbols" /></p>
-         <p>start_date (YYYY-MM-DD) <input type = "text" name = "start_date" /></p>
-         <p>end_date (YYYY-MM-DD) <input type = "text" name = "end_date" /></p>
-         <p>thirty_day_weight (two decimal places) <input type = "number" step = "0.01" name = "thirty_day_weight" /></p>
-         <p>sixty_day_weight <input type = "number" step = "0.01" name = "sixty_day_weight" /></p>
-         <p>ninety_day_weight <input type = "number" step = "0.01" name = "ninety_day_weight" /></p>
-         <p>one_eighty_day_weight <input type = "number" step = "0.01" name = "one_eighty_day_weight" /></p>
-         <p><input type = "submit" value = "submit" /></p>
+      <form class="form-vertical" name="vm.params" ng-submit="vm.submitForm()" novalidate>
+          <div class="row row-content">
+			  
+			 <!-- File Name --> 
+			 <div class="form-group" ng-class="{ 'has-error' : vm.params.filename.$error.required && vm.params.$submitted }">
+			<div class="col-sm-4 col-sm-offset-4 text-center">
+         	<label>output will save to a file named:</label><br>
+			<input type="text" class="form-control text-center" ng-model="vm.filename" name="filename" required/>
+			<span class="help-block" ng-show="vm.params.filename.$error.required && vm.params.$submitted">Please enter file name</span>
+			</div>
+			</div> <!-- END HAS ERROR CLASS -->
+			
+			<!-- Symbols -->
+			<div class="form-group" ng-class="{ 'has-error' : vm.params.symbols.$error.required && vm.params.$submitted }">
+			<div class="col-sm-4 col-sm-offset-4 text-center">
+	         	<label>stocks:</label><br>
+				<input type="text" class="form-control text-center" name="symbols" ng-model="vm.symbols" placeholder="AAPL, C, GOOG, INTC, etc." required>
+			<span class="help-block has-error" ng-show="vm.params.symbols.$error.required && vm.params.$submitted">Please enter stocks</span>
+			</div>
+			</div> <!-- END HAS ERROR CLASS -->
+			
+			<!-- Start Date -->
+			<div class="form-group" ng-class="{ 'has-error' : vm.params.start.$error.required && vm.params.$submitted }">
+			<div class="col-sm-4 col-sm-offset-4 text-center">
+	         	<label>start date:</label><br>
+				<input type="text" class="form-control text-center" name="start" ng-model="vm.start_date"  ui-mask="99/99/9999" required>
+			<span class="help-block" ng-show="vm.params.start.$error.required && vm.params.$submitted">Please enter start date</span>
+			</div>
+			</div> <!-- END HAS ERROR CLASS -->
+			
+			
+			<!-- End Date -->
+			<div class="form-group" ng-class="{ 'has-error' : vm.params.end.$error.required && vm.params.$submitted }">
+			<div class="col-sm-4 col-sm-offset-4 text-center">
+	         	<label>end date:</label><br>
+				<input type="text" class="form-control text-center" name="end" ng-model="vm.end_date" ui-mask="99/99/9999" placeholder="MM/DD/YYYY" required>
+			<span class="help-block" ng-show="vm.params.end.$error.required && vm.params.$submitted">Please enter end date</span>
+			</div>
+			</div> <!-- END HAS ERROR CLASS -->
+			
+			<!-- 30 day weight -->
+			<div class="form-group" ng-class="{ 'has-error' : vm.params.thirty.$error.required && vm.params.$submitted }">
+			<div class="col-sm-4 col-sm-offset-4 text-center">
+	         	<label>30 day weight:</label><br>
+				<input type="text" class="form-control text-center" name="thirty" ng-model="vm.thirty_day_weight" ui-mask="0.99" ui-mask-placeholder-char="_" required>
+			<span class="help-block" ng-show="vm.params.thirty.$error.required && vm.params.$submitted">Please enter thirty day weight</span>
+			</div>
+			</div> <!-- END HAS ERROR CLASS -->
+			
+			<!-- 60 day weight -->
+			<div class="form-group" ng-class="{ 'has-error' : vm.params.sixty.$error.required && vm.params.$submitted }">
+			<div class="col-sm-4 col-sm-offset-4 text-center">
+	         	<label>60 day weight:</label><br>
+				<input type="text" class="form-control text-center" name="sixty" ng-model="vm.sixty_day_weight" ui-mask="0.99" ui-mask-placeholder-char="_" required>
+			<span class="help-block" ng-show="vm.params.sixty.$error.required && vm.params.$submitted">Please enter sixty day weight</span>
+			</div>
+			</div> <!-- END HAS ERROR CLASS -->
+			
+			<!-- 90 day weight -->
+			<div class="form-group" ng-class="{ 'has-error' : vm.params.ninety.$error.required && vm.params.$submitted }">
+			<div class="col-sm-4 col-sm-offset-4 text-center">
+	         	<label>90 day weight:</label><br>
+				<input type="text" class="form-control text-center" name="ninety" ng-model="vm.ninety_day_weight" ui-mask="0.99" ui-mask-placeholder-char="_" required>
+			<span class="help-block" ng-show="vm.params.ninety.$error.required && vm.params.$submitted">Please enter ninety day weight</span>
+			</div>
+			</div> <!-- END HAS ERROR CLASS -->
+			
+			<!-- 180 day weight -->
+			<div class="form-group" ng-class="{ 'has-error' : vm.params.oneeighty.$error.required && vm.params.$submitted }">
+			<div class="col-sm-4 col-sm-offset-4 text-center">
+	         	<label>180 day weight:</label><br>
+				<input type="text" class="form-control text-center" name="oneeighty" ng-model="vm.one_eighty_day_weight" ui-mask="0.99" ui-mask-placeholder-char="_" required>
+			<span class="help-block" ng-show="vm.params.oneeighty.$error.required && vm.params.$submitted">Please enter one hundred eighty day weight</span>
+			</div>
+			</div> <!-- END HAS ERROR CLASS -->
+			
+			<!-- Weights don't sum to 1 error --> 
+			<div class="col-sm-4 col-sm-offset-4 text-center">
+			<span class="text-danger" ng-show="vm.weightSumError && vm.params.$submitted"><br>Weights must sum to 1.0</span>
+			</div>
+			
+				
+			
+			<!--
+         	<p>symbols -- enter as comma separated symbols without spaces. Ex: VTI,VO,VB,IWC 			<input type = "text" name = "symbols" /></p>
+         	<p>start_date (YYYY-MM-DD) <input type = "text" name = "start_date" /></p>
+         	<p>end_date (YYYY-MM-DD) <input type = "text" name = "end_date" /></p>
+        	<p>thirty_day_weight (two decimal places) <input type = "number" step = "0.01" name = "thirty_day_weight" /></p>
+         	<p>sixty_day_weight <input type = "number" step = "0.01" name = "sixty_day_weight" /></p>
+         	<p>ninety_day_weight <input type = "number" step = "0.01" name = "ninety_day_weight" /></p>
+         	<p>one_eighty_day_weight <input type = "number" step = "0.01" name = "one_eighty_day_weight" /></p>
+          <p><input type = "submit" value = "submit" /></p> -->
+		  </div> <!--END ROW-->
+		  	<br>
+		 	<button class="btn btn-primary" type="submit">Submit</button>
       </form>
+	</div>
+	  
+	  <script>
+	  (function() {
+	  	'use strict'
+		 angular.module('mainApp', ['ui.mask'])
+		  .controller('paramController', paramController)
+		  .service('formService', formService);
+		  formService.$inject = ['$http'];
+		  function formService($http) {
+			  this.submitForm = function(formInputs) {
+				  var req = {
+				   method: 'POST',
+				   url: '/result',
+				   headers: {
+					   'Content-Type': 'application/json',
+					   'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+				   },
+                   responseType: 'arraybuffer',
+				   data: formInputs
+				  }
+				  return $http(req);
+			  };
+		  }
+		  paramController.$inject = ['formService'];
+		  function paramController(formService) {
+			  var vm = this;
+			  vm.filename = "stock-returns";
+			  vm.symbols = 'AAPL, C, GOOG, INTC';
+			  vm.thirty_day_weight = 25;
+			  vm.sixty_day_weight = 25;
+			  vm.ninety_day_weight = 25;
+			  vm.one_eighty_day_weight = 25;
+			  vm.weightSumError;
+			  
+			  var d = new Date();
+			  var month = d.getMonth() + 1;
+			  if (month / 10 < 1) {
+				  month = '0' + month;
+			  } else {
+				  month += '';
+			  }
+			  var day = d.getDate();
+			  day += '';
+			  var year = d.getFullYear();
+			  var yearBefore = year - 1 + '';
+			  year += '';
+			  console.log(month, day, year);
+			  console.log(month + '/' + day + '/' + year);
+			  //vm.start_date = month + '/' + day + '/' + year;
+			  vm.end_date = month + day + year;
+			  vm.start_date = month + day + yearBefore;
+			  
+			  function weightsOk() {
+				  return Number(vm.thirty_day_weight) +
+				  Number(vm.sixty_day_weight) +
+				  Number(vm.ninety_day_weight) +
+				  Number(vm.one_eighty_day_weight) === 100;
+			  }
+			  
+			  function prepParams() {
+				  var cleanedParams = {};
+				  cleanedParams.symbols = vm.symbols.replace(/\s/g, '');
+				  cleanedParams.thirty_day_weight = Number(vm.thirty_day_weight) / 100;
+				  cleanedParams.sixty_day_weight = Number(vm.sixty_day_weight) / 100;
+				  cleanedParams.ninety_day_weight = Number(vm.ninety_day_weight) / 100;
+				  cleanedParams.one_eighty_day_weight = Number(vm.one_eighty_day_weight) / 100;
+				  var prepMonth = vm.start_date.substring(0, 2);
+				  var prepDay = vm.start_date.substring(2, 4);
+				  var prepYear = vm.start_date.substring(4, 8);
+				  cleanedParams.start_date = prepMonth + '/' + prepDay + '/' + prepYear;
+				  prepMonth = vm.end_date.substring(0, 2);
+				  prepDay = vm.end_date.substring(2, 4);
+				  prepYear = vm.end_date.substring(4, 8);
+				  cleanedParams.end_date = prepMonth + '/' + prepDay + '/' + prepYear;
+				  cleanedParams.filename = vm.filename;
+				  
+				  
+				  return cleanedParams;
+				  
+			  }
+			  
+			  vm.submitForm = function() {
+				  console.log(vm.thirty_day_weight);
+				  console.log(weightsOk());
+				  console.log(vm.params.$valid);
+				  if (vm.params.$valid) {
+					  if (weightsOk()) {
+						  vm.weightSumError = false;
+						  var cleanParams = prepParams();
+						  console.log(cleanParams);
+				  		  formService.submitForm(cleanParams)
+						  	.then(function(response) {
+						  		console.dir(response.data);
+								var blob = new Blob([response.data], 
+								     {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+								saveAs(blob, vm.filename + '.xlsx');
+						  	})
+							.catch(function(error) {
+								console.log(error);
+							});
+					  } else {
+					  		vm.weightSumError = true;
+				  	  }
+				  } 
+			  }; 
+		  }
+	  })();
+	  </script>
       
    </body>
 </html>

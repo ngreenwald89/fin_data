@@ -32,10 +32,8 @@ def make_frames_wrapper(parameters):
 def make_date_objects(*dates):
 	date_objects = []
 	for date in dates:
-		print('date before split', date)
-		date = [int(string) for string in date.split('-')]
-		print('date after split', date)
-		obj=datetime.date(date[0], date[1], date[2])
+		date = [int(string) for string in date.split('/')]
+		obj=datetime.date(date[2], date[0], date[1])
 		date_objects.append(obj)
 	return date_objects
 
